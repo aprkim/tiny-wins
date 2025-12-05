@@ -918,12 +918,14 @@
             localStorage.setItem('dailyChecklistHistory', JSON.stringify(history));
         }
         
-        // Save user's default task list template (ALL tasks, to be restored on reset)
+        // Save user's default task list template (only uncompleted tasks become the daily template)
         function saveUserDefaultTasks() {
-            // Save all task texts, including completed ones
-            const allTaskTexts = currentData.tasks.map(t => t.text);
-            localStorage.setItem('userDefaultTasks', JSON.stringify(allTaskTexts));
-            console.log('Saved default tasks:', allTaskTexts);
+            // Save active (uncompleted) task texts - the master list for daily resets
+            const activeTaskTexts = currentData.tasks
+                .filter(t => !t.completed)
+                .map(t => t.text);
+            localStorage.setItem('userDefaultTasks', JSON.stringify(activeTaskTexts));
+            console.log('Saved default tasks:', activeTaskTexts, 'from total tasks:', currentData.tasks.length);
         }
 
         // Add new task

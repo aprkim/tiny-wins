@@ -115,6 +115,65 @@
             cursor: not-allowed;
         }
 
+        .confirm-modal {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .confirm-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .confirm-message {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 25px;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        .confirm-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .confirm-button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .confirm-button.cancel {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .confirm-button.cancel:hover {
+            background: #d0d0d0;
+        }
+
+        .confirm-button.confirm {
+            background: #BF3143;
+            color: white;
+        }
+
+        .confirm-button.confirm:hover {
+            background: #a02838;
+        }
+
         .container {
             max-width: 600px;
             margin: 0 auto;
@@ -597,6 +656,18 @@
         </div>
     </div>
 
+    <!-- Confirmation Modal -->
+    <div class="modal-overlay hidden" id="confirmModal">
+        <div class="confirm-modal">
+            <div class="confirm-title" id="confirmTitle">Confirm Action</div>
+            <div class="confirm-message" id="confirmMessage">Are you sure?</div>
+            <div class="confirm-buttons">
+                <button class="confirm-button cancel" onclick="closeConfirmModal()">Cancel</button>
+                <button class="confirm-button confirm" id="confirmButton">OK</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Data structure
         let currentData = {
@@ -967,11 +1038,11 @@
 
         // Reset today's tasks
         function resetToday() {
-            if (!confirm('Are you sure you want to reset today\'s tasks? This cannot be undone.')) {
-                return;
-            }
-            
-            currentData.tasks = [];
+            showConfirmModal(
+                'Reset Today',
+                'Are you sure you want to reset today\'s tasks? This cannot be undone.',
+                () => {
+                    currentData.tasks = [];
             currentData.totalTasks = 0;
             currentData.completedTasks = 0;
             currentData.confettiShown = false;
@@ -995,9 +1066,11 @@
                 currentData.totalTasks = taskTexts.length;
             }
             
-            saveData();
-            updateProgress();
-            renderTasks();
+                    saveData();
+                    updateProgress();
+                    renderTasks();
+                }
+            );
         }
 
         // Delete history item
@@ -1009,12 +1082,15 @@
 
         // Clear all history
         function clearAllHistory() {
-            if (!confirm('Are you sure you want to delete all history? This cannot be undone.')) {
-                return;
-            }
-            history = [];
-            localStorage.setItem('dailyChecklistHistory', JSON.stringify(history));
-            renderHistory();
+            showConfirmModal(
+                'Clear All History',
+                'Are you sure you want to delete all history? This cannot be undone.',
+                () => {
+                    history = [];
+                    localStorage.setItem('dailyChecklistHistory', JSON.stringify(history));
+                    renderHistory();
+                }
+            );
         }
 
         // Update add button state
@@ -1105,6 +1181,27 @@
 
         let draggedElement = null;
         let editModeEnabled = false;
+        let confirmCallback = null;
+
+        // Custom confirmation modal
+        function showConfirmModal(title, message, onConfirm) {
+            document.getElementById('confirmTitle').textContent = title;
+            document.getElementById('confirmMessage').textContent = message;
+            confirmCallback = onConfirm;
+            document.getElementById('confirmModal').classList.remove('hidden');
+            
+            // Set up the confirm button click
+            const confirmBtn = document.getElementById('confirmButton');
+            confirmBtn.onclick = () => {
+                closeConfirmModal();
+                if (confirmCallback) confirmCallback();
+            };
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').classList.add('hidden');
+            confirmCallback = null;
+        }
 
         function toggleEditMode() {
             editModeEnabled = !editModeEnabled;

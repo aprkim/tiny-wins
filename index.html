@@ -41,6 +41,30 @@
             margin-bottom: 20px;
         }
 
+        .edit-mode-toggle {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.05);
+            border: 2px solid #e0e0e0;
+            color: #666;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+
+        .edit-mode-toggle:hover {
+            background: rgba(0, 0, 0, 0.08);
+        }
+
+        .edit-mode-toggle.active {
+            background: #BF3143;
+            color: white;
+            border-color: #BF3143;
+        }
+
         .progress-section {
             background: #f9f9f9;
             padding: 15px;
@@ -146,6 +170,18 @@
             margin-bottom: 20px;
         }
 
+        .button-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
         .task-item {
             display: flex;
             align-items: center;
@@ -155,7 +191,6 @@
             margin-bottom: 10px;
             background: white;
             transition: all 0.3s ease;
-            cursor: move;
         }
 
         .task-item.dragging {
@@ -177,12 +212,12 @@
 
         .task-item.removing {
             opacity: 0;
-            transform: translateX(100%);
+            transform: scale(0.95);
         }
 
         .drag-handle {
             cursor: move;
-            margin-right: 10px;
+            margin-left: 10px;
             color: #999;
             font-size: 18px;
             flex-shrink: 0;
@@ -197,10 +232,28 @@
             accent-color: #BF3143;
         }
 
+        .edit-mode .task-checkbox {
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
         .task-text {
             flex: 1;
             font-size: 16px;
             word-break: break-word;
+        }
+
+        .edit-mode .task-text {
+            cursor: pointer;
+        }
+
+        .task-edit-input {
+            flex: 1;
+            font-size: 16px;
+            padding: 5px;
+            border: 2px solid #888;
+            border-radius: 5px;
+            outline: none;
         }
 
         .reset-button {
@@ -226,11 +279,33 @@
             padding-top: 20px;
         }
 
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
         .history-title {
             font-size: 20px;
             font-weight: 600;
-            margin-bottom: 15px;
             color: #333;
+        }
+
+        .clear-history-button {
+            padding: 6px 16px;
+            background: none;
+            color: #666;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .clear-history-button:hover {
+            color: #BF3143;
         }
 
         .history-list {
@@ -244,6 +319,27 @@
             background: #f9f9f9;
             border-radius: 5px;
             margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-content {
+            flex: 1;
+        }
+
+        .history-delete {
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 5px 10px;
+            transition: color 0.2s;
+        }
+
+        .history-delete:hover {
+            color: #BF3143;
         }
 
         .history-date {
@@ -355,10 +451,16 @@
                 <button id="addButton">Add</button>
             </div>
 
-            <button class="reset-button" id="resetButton">Reset Today</button>
+            <div class="button-row">
+                <button class="reset-button" id="resetButton">Reset Today</button>
+                <button class="edit-mode-toggle" id="editModeToggle" onclick="toggleEditMode()">⚙ Edit Mode</button>
+            </div>
 
             <div class="history-section">
-                <div class="history-title">📊 History</div>
+                <div class="history-header">
+                    <div class="history-title">📊 History</div>
+                    <button class="clear-history-button" onclick="clearAllHistory()">Clear All</button>
+                </div>
                 <div class="history-list" id="historyList"></div>
             </div>
         </div>
@@ -599,13 +701,14 @@
             
             taskList.innerHTML = activeTasks.map(task => `
                 <div class="task-item" data-task-id="${task.id}" draggable="true">
-                    <span class="drag-handle">⋮⋮</span>
                     <input 
                         type="checkbox" 
                         class="task-checkbox" 
+                        id="checkbox-${task.id}"
                         onchange="completeTask(${task.id})"
                     >
-                    <span class="task-text">${escapeHtml(task.text)}</span>
+                    <span class="task-text" onclick="handleTaskTextClick(${task.id})">${escapeHtml(task.text)}</span>
+                    <span class="drag-handle">&#8942;&#8942;</span>
                 </div>
             `).join('');
             
@@ -621,14 +724,17 @@
                 return;
             }
             
-            historyList.innerHTML = history.map(entry => {
+            historyList.innerHTML = history.map((entry, index) => {
                 const percentage = Math.round((entry.completedTasks / entry.totalTasks) * 100);
                 return `
                     <div class="history-item">
-                        <div class="history-date">${formatDate(entry.date)}</div>
-                        <div class="history-stats">
-                            ${entry.completedTasks} / ${entry.totalTasks} tasks completed (${percentage}%)
+                        <div class="history-content">
+                            <div class="history-date">${formatDate(entry.date)}</div>
+                            <div class="history-stats">
+                                ${entry.completedTasks} / ${entry.totalTasks} tasks completed (${percentage}%)
+                            </div>
                         </div>
+                        <button class="history-delete" onclick="deleteHistoryItem(${index})" title="Delete">×</button>
                     </div>
                 `;
             }).join('');
@@ -684,9 +790,34 @@
             currentData.completedTasks = 0;
             currentData.confettiShown = false;
             
+            // Turn off edit mode if it's on
+            if (editModeEnabled) {
+                toggleEditMode();
+            }
+            
+            // Reload default tasks
+            initializeDefaultTasks();
+            
             saveData();
             updateProgress();
             renderTasks();
+        }
+
+        // Delete history item
+        function deleteHistoryItem(index) {
+            history.splice(index, 1);
+            localStorage.setItem('dailyChecklistHistory', JSON.stringify(history));
+            renderHistory();
+        }
+
+        // Clear all history
+        function clearAllHistory() {
+            if (!confirm('Are you sure you want to delete all history? This cannot be undone.')) {
+                return;
+            }
+            history = [];
+            localStorage.setItem('dailyChecklistHistory', JSON.stringify(history));
+            renderHistory();
         }
 
         // Update add button state
@@ -694,6 +825,64 @@
             const input = document.getElementById('taskInput');
             const button = document.getElementById('addButton');
             button.disabled = !input.value.trim();
+        }
+
+        // Handle task text click based on mode
+        function handleTaskTextClick(taskId) {
+            if (editModeEnabled) {
+                startEditTask(taskId);
+            } else {
+                document.getElementById(`checkbox-${taskId}`).click();
+            }
+        }
+
+        // Start editing a task
+        function startEditTask(taskId) {
+            const task = currentData.tasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            const taskElement = document.querySelector(`[data-task-id="${taskId}"]`);
+            const taskTextElement = taskElement.querySelector('.task-text');
+            const dragHandle = taskElement.querySelector('.drag-handle');
+            
+            // Create input field
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'task-edit-input';
+            input.value = task.text;
+            
+            // Replace text with input
+            taskTextElement.replaceWith(input);
+            input.focus();
+            input.select();
+            
+            // Hide drag handle during edit
+            dragHandle.style.display = 'none';
+            taskElement.draggable = false;
+            
+            // Save on Enter or blur
+            const saveEdit = () => {
+                const newText = input.value.trim();
+                if (newText && newText !== task.text) {
+                    task.text = newText;
+                    saveData();
+                }
+                input.blur(); // Remove focus
+                renderTasks();
+            };
+            
+            input.addEventListener('blur', saveEdit);
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    saveEdit();
+                }
+            });
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    input.blur(); // Remove focus
+                    renderTasks();
+                }
+            });
         }
 
         // Setup drag and drop
@@ -707,9 +896,33 @@
                 item.addEventListener('drop', handleDrop);
                 item.addEventListener('dragleave', handleDragLeave);
             });
+            
+            // Apply edit mode state if active
+            if (editModeEnabled) {
+                document.getElementById('taskList').classList.add('edit-mode');
+                document.getElementById('editModeToggle').classList.add('active');
+                document.getElementById('editModeToggle').textContent = '✓ Done Editing';
+            }
         }
 
         let draggedElement = null;
+        let editModeEnabled = false;
+
+        function toggleEditMode() {
+            editModeEnabled = !editModeEnabled;
+            const taskList = document.getElementById('taskList');
+            const toggleButton = document.getElementById('editModeToggle');
+            
+            if (editModeEnabled) {
+                taskList.classList.add('edit-mode');
+                toggleButton.classList.add('active');
+                toggleButton.textContent = '✓ Done Editing';
+            } else {
+                taskList.classList.remove('edit-mode');
+                toggleButton.classList.remove('active');
+                toggleButton.textContent = '⚙ Edit Mode';
+            }
+        }
 
         function handleDragStart(e) {
             draggedElement = this;

@@ -825,6 +825,10 @@
 
         // Initialize app
         function init() {
+            console.log('=== INIT START ===');
+            console.log('userDefaultTasks from storage:', localStorage.getItem('userDefaultTasks'));
+            console.log('setupComplete:', localStorage.getItem('setupComplete'));
+            
             // Check if first-time setup is needed
             if (checkFirstTimeSetup()) {
                 return; // Don't continue init until template is selected
@@ -838,6 +842,8 @@
             renderTasks();
             renderHistory();
             setupEventListeners();
+            
+            console.log('=== INIT END ===');
         }
 
         // Initialize default tasks if it's a new day with no tasks
@@ -1244,16 +1250,28 @@
 
         // Custom confirmation modal
         function showConfirmModal(title, message, onConfirm) {
+            console.log('showConfirmModal called with:', title);
             document.getElementById('confirmTitle').textContent = title;
             document.getElementById('confirmMessage').textContent = message;
             confirmCallback = onConfirm;
             document.getElementById('confirmModal').classList.remove('hidden');
             
-            // Set up the confirm button click
+            // Remove old event listener and add new one
             const confirmBtn = document.getElementById('confirmButton');
-            confirmBtn.onclick = () => {
+            const newConfirmBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+            
+            newConfirmBtn.onclick = () => {
+                console.log('Confirm button clicked, executing callback');
                 closeConfirmModal();
-                if (confirmCallback) confirmCallback();
+                if (confirmCallback) {
+                    console.log('Calling confirmCallback');
+                    const callback = confirmCallback;
+                    confirmCallback = null;
+                    callback();
+                } else {
+                    console.log('No confirmCallback set!');
+                }
             };
         }
 

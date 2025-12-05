@@ -209,6 +209,10 @@
             font-weight: 600;
             transition: all 0.3s;
             margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
         }
 
         .edit-mode-toggle:hover {
@@ -436,6 +440,18 @@
             cursor: pointer;
             margin-bottom: 20px;
             transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .button-icon {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
         }
 
         .reset-button:hover {
@@ -665,8 +681,18 @@
             </div>
 
             <div class="button-row">
-                <button class="reset-button" id="resetButton">Reset Today</button>
-                <button class="edit-mode-toggle" id="editModeToggle" onclick="toggleEditMode()">Edit Mode</button>
+                <button class="reset-button" id="resetButton">
+                    <svg class="button-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    <span>Reset Today</span>
+                </button>
+                <button class="edit-mode-toggle" id="editModeToggle" onclick="toggleEditMode()">
+                    <svg class="button-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                    </svg>
+                    <span>Edit Mode</span>
+                </button>
             </div>
 
             <div class="history-section">
@@ -1245,14 +1271,20 @@
             const taskList = document.getElementById('taskList');
             const toggleButton = document.getElementById('editModeToggle');
             
+            const editIcon = `
+                <svg class="button-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+            `;
+            
             if (editModeEnabled) {
                 taskList.classList.add('edit-mode');
                 toggleButton.classList.add('active');
-                toggleButton.textContent = 'Done Editing';
+                toggleButton.innerHTML = '<span>Done Editing</span>';
             } else {
                 taskList.classList.remove('edit-mode');
                 toggleButton.classList.remove('active');
-                toggleButton.textContent = 'Edit Mode';
+                toggleButton.innerHTML = editIcon + '<span>Edit Mode</span>';
             }
         }
 

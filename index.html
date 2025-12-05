@@ -206,24 +206,27 @@
         }
 
         .edit-mode-toggle {
-            flex: 1;
-            padding: 12px;
-            background: rgba(0, 0, 0, 0.05);
+            width: 100%;
+            padding: 10px;
+            background: white;
             border: 2px solid #e0e0e0;
             color: #666;
             border-radius: 10px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
             transition: all 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 6px;
+            margin-bottom: 10px;
         }
 
         .edit-mode-toggle:hover {
-            background: rgba(0, 0, 0, 0.08);
+            background: #f9f9f9;
+            border-color: #BF3143;
+            color: #BF3143;
         }
 
         .edit-mode-toggle.active {
@@ -390,22 +393,16 @@
             margin-bottom: 20px;
         }
 
-        .button-row {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
         .change-template-button {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             background: white;
-            border: 2px solid #e0e0e0;
-            color: #666;
-            border-radius: 10px;
+            border: 1px solid #d0d0d0;
+            color: #888;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
+            font-size: 14px;
+            font-weight: 500;
             transition: all 0.3s;
             display: flex;
             align-items: center;
@@ -418,6 +415,24 @@
             background: #f9f9f9;
             border-color: #BF3143;
             color: #BF3143;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px 0;
+            color: #888;
+            font-size: 14px;
+        }
+
+        .footer a {
+            color: #888;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer a:hover {
+            color: #BF3143;
+            text-decoration: underline;
         }
 
         .task-item {
@@ -495,32 +510,46 @@
         }
 
         .reset-button {
-            flex: 1;
-            padding: 12px;
-            background: #e0e0e0;
-            color: #333333;
+            width: 100%;
+            padding: 14px;
+            background: #BF3143;
+            color: white;
             border: none;
             border-radius: 10px;
-            font-size: 16px;
+            font-size: 17px;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: all 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 8px;
+            margin-bottom: 10px;
         }
 
         .button-icon {
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
             stroke: currentColor;
             stroke-width: 2;
             fill: none;
         }
 
         .reset-button:hover {
-            background: #d0d0d0;
+            background: #a02838;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(191, 49, 67, 0.2);
+        }
+
+        .reset-button:active {
+            transform: translateY(0);
+        }
+
+        /* Dim Reset Today button when user is typing */
+        #taskInput:focus ~ .reset-button,
+        body:has(#taskInput:focus) .reset-button {
+            opacity: 0.3;
+            pointer-events: none;
         }
 
         .history-section {
@@ -612,6 +641,11 @@
         .history-stats {
             color: #666;
             font-size: 14px;
+        }
+
+        .history-item.placeholder {
+            opacity: 0.4;
+            pointer-events: none;
         }
 
         .empty-message {
@@ -756,20 +790,19 @@
                 <button id="addButton">Add</button>
             </div>
 
-            <div class="button-row">
-                <button class="reset-button" id="resetButton">
-                    <svg class="button-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                    </svg>
-                    <span>Reset Today</span>
-                </button>
-                <button class="edit-mode-toggle" id="editModeToggle" onclick="toggleEditMode()">
-                    <svg class="button-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                    </svg>
-                    <span>Edit Mode</span>
-                </button>
-            </div>
+            <button class="reset-button" id="resetButton">
+                <svg class="button-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+                <span>Reset Today</span>
+            </button>
+
+            <button class="edit-mode-toggle" id="editModeToggle" onclick="toggleEditMode()">
+                <svg class="button-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+                <span>Edit Mode</span>
+            </button>
 
             <div class="history-section">
                 <div class="history-header">
@@ -790,6 +823,10 @@
                 </svg>
                 <span>Change Template</span>
             </button>
+
+            <div class="footer">
+                Created by <a href="mailto:aprkim@gmail.com">April Kim</a> • 2025
+            </div>
         </div>
     </div>
 
@@ -1144,7 +1181,26 @@
             const historyList = document.getElementById('historyList');
             
             if (history.length === 0) {
-                historyList.innerHTML = '<div class="empty-message">No history yet.</div>';
+                historyList.innerHTML = `
+                    <div class="history-item placeholder">
+                        <div class="history-content">
+                            <div class="history-date">December 1, 2025</div>
+                            <div class="history-stats">8 / 10 tasks completed (80%)</div>
+                        </div>
+                    </div>
+                    <div class="history-item placeholder">
+                        <div class="history-content">
+                            <div class="history-date">November 30, 2025</div>
+                            <div class="history-stats">10 / 10 tasks completed (100%)</div>
+                        </div>
+                    </div>
+                    <div class="history-item placeholder">
+                        <div class="history-content">
+                            <div class="history-date">November 29, 2025</div>
+                            <div class="history-stats">7 / 10 tasks completed (70%)</div>
+                        </div>
+                    </div>
+                `;
                 return;
             }
             

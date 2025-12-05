@@ -87,17 +87,17 @@
             transition: all 0.3s;
         }
 
-        .template-container:has(.template-option.selected) .template-option:not(.selected):hover {
-            /* Disable hover effect when a template is already selected */
-            border-color: #e0e0e0;
-            background: white;
-            opacity: 1;
-        }
-
         .template-option:hover:not(.selected) {
             border-color: #BF3143;
             background: #fff5f7;
             opacity: 0.8;
+        }
+
+        /* Disable hover effect on non-selected templates when one is already selected */
+        .template-container:has(.template-option.selected) .template-option:not(.selected):hover {
+            border-color: #e0e0e0 !important;
+            background: white !important;
+            opacity: 1 !important;
         }
 
         .template-option.selected {

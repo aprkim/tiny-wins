@@ -52,6 +52,23 @@
             margin-bottom: 10px;
             color: #333;
             text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .modal-title-icon {
+            width: 32px;
+            height: 32px;
+        }
+
+        .modal-tagline {
+            font-size: 18px;
+            font-weight: 500;
+            color: #BF3143;
+            margin-bottom: 10px;
+            text-align: center;
         }
 
         .modal-subtitle {
@@ -70,9 +87,10 @@
             transition: all 0.3s;
         }
 
-        .template-option:hover {
+        .template-option:hover:not(.selected) {
             border-color: #BF3143;
             background: #fff5f7;
+            opacity: 0.8;
         }
 
         .template-option.selected {
@@ -419,7 +437,7 @@
 
         .footer {
             text-align: center;
-            padding: 20px 0;
+            padding: 5px 0 0 0;
             color: #888;
             font-size: 14px;
         }
@@ -723,8 +741,14 @@
 <body>
     <div class="modal-overlay" id="setupModal">
         <div class="modal">
-            <div class="modal-title">Welcome to Daily Checklist! 🎯</div>
-            <div class="modal-subtitle">Choose a template to get started, or start with an empty list</div>
+            <div class="modal-title">
+                <svg class="modal-title-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M5 3v18l7-5 7 5V3H5z" fill="#BF3143"/>
+                </svg>
+                Welcome to Tiny Wins!
+            </div>
+            <div class="modal-tagline">Small steps. Big impact.</div>
+            <div class="modal-subtitle">Choose a template to get started, or begin with an empty list.</div>
             
             <div class="template-option" onclick="selectTemplate('empty')">
                 <div class="template-name">Empty List</div>

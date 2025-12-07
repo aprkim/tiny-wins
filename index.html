@@ -39,7 +39,7 @@
         /* ==================== ONBOARDING VIEW ==================== */
         .onboarding {
             min-height: 100vh;
-            background: linear-gradient(180deg, #FEF2F2 0%, #FAFAFA 100%);
+            background: #F8F8F8;
             padding: 40px 20px;
         }
 
@@ -130,22 +130,16 @@
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
+            background: #E5E7EB;
         }
 
         .template-card-icon svg {
             width: 24px;
             height: 24px;
-            stroke: white;
+            stroke: #6B7280;
             stroke-width: 2;
             fill: none;
         }
-
-        .template-card-icon.productivity { background: #BF3143; }
-        .template-card-icon.wellness { background: #16A34A; }
-        .template-card-icon.workday { background: #3B82F6; }
-        .template-card-icon.weekend { background: #F59E0B; }
-        .template-card-icon.student { background: #8B5CF6; }
-        .template-card-icon.blank { background: #64748B; }
 
         .template-card-title {
             font-size: 17px;
@@ -165,20 +159,9 @@
         }
 
         .template-card-task {
-            display: flex;
-            align-items: center;
-            gap: 8px;
             font-size: 14px;
             color: #64748B;
-        }
-
-        .template-card-task::before {
-            content: '';
-            width: 6px;
-            height: 6px;
-            background: #CBD5E1;
-            border-radius: 50%;
-            flex-shrink: 0;
+            padding: 2px 0;
         }
 
         .template-card.blank-card {
@@ -202,7 +185,7 @@
         .blank-card-icon {
             width: 48px;
             height: 48px;
-            background: #E2E8F0;
+            background: #E5E7EB;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -213,7 +196,7 @@
         .blank-card-icon svg {
             width: 24px;
             height: 24px;
-            stroke: #64748B;
+            stroke: #6B7280;
             stroke-width: 2;
             fill: none;
         }
@@ -1265,7 +1248,7 @@
                 html += `
                     <div class="template-card" data-template="${key}" onclick="selectTemplate('${key}')">
                         <div class="template-card-header">
-                            <div class="template-card-icon ${template.icon}">
+                            <div class="template-card-icon">
                                 <svg viewBox="0 0 24 24">${ICONS[template.icon]}</svg>
                             </div>
                             <div>
@@ -1275,7 +1258,7 @@
                         </div>
                         <div class="template-card-tasks">
                             ${template.tasks.slice(0, 3).map(t => `<div class="template-card-task">${t}</div>`).join('')}
-                            ${template.tasks.length > 3 ? `<div class="template-card-task">+${template.tasks.length - 3} more...</div>` : ''}
+                            ${template.tasks.length > 3 ? `<div class="template-card-task" style="color: #94A3B8;">+${template.tasks.length - 3} more...</div>` : ''}
                         </div>
                     </div>
                 `;

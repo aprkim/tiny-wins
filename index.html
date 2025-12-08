@@ -1085,7 +1085,7 @@
                         </svg>
                         Weekday Tasks
                     </div>
-                    <button class="clear-all-btn" onclick="clearAllTemplateTasks()">Clear All</button>
+                    <button class="clear-all-btn" id="clearAllTemplateBtn" onclick="clearAllTemplateTasks()">Clear All</button>
                 </div>
                 <div class="task-list" id="templateTaskList"></div>
             </div>
@@ -1291,8 +1291,9 @@
                 state.todayTasks = JSON.parse(savedTodayTasks);
             }
             
-            state.todayMode = localStorage.getItem(STORAGE_KEYS.TODAY_MODE) || getDayMode();
+            // Load saved date/mode, but will be verified/updated by checkDateChange()
             state.todayDate = localStorage.getItem(STORAGE_KEYS.TODAY_DATE) || getTodayString();
+            state.todayMode = localStorage.getItem(STORAGE_KEYS.TODAY_MODE) || getDayMode();
             
             const savedHistory = localStorage.getItem(STORAGE_KEYS.HISTORY);
             if (savedHistory) {
@@ -1417,6 +1418,12 @@
             const today = getTodayString();
             const currentMode = getDayMode();
             
+            // Update mode if it's incorrect, even if date hasn't changed
+            if (state.todayMode !== currentMode && state.todayDate === today) {
+                state.todayMode = currentMode;
+                localStorage.setItem(STORAGE_KEYS.TODAY_MODE, state.todayMode);
+            }
+            
             if (state.todayDate !== today) {
                 // Get uncompleted one-time tasks to carry over
                 const carryOverTasks = state.todayTasks
@@ -1477,7 +1484,11 @@
 
         // ==================== DATE UTILITIES ====================
         function getTodayString() {
-            return new Date().toISOString().split('T')[0];
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
         }
 
         function formatDate(dateString) {
@@ -1669,12 +1680,16 @@
 
         function renderTemplateList() {
             const taskList = document.getElementById('templateTaskList');
+            const clearAllBtn = document.getElementById('clearAllTemplateBtn');
             const tasks = state.templates[state.activeTemplateMode] || [];
             
             if (tasks.length === 0) {
                 taskList.innerHTML = '<div class="empty-message">No tasks in this template. Add some below!</div>';
+                clearAllBtn.style.display = 'none';
                 return;
             }
+            
+            clearAllBtn.style.display = 'block';
             
             taskList.innerHTML = tasks.map((task, index) => `
                 <div class="template-item" data-id="${task.id}" data-index="${index}">

@@ -970,10 +970,6 @@
                 </svg>
                 Reset Today
             </button>
-
-            <div class="change-template-link">
-                <a onclick="showChangeTemplateModal()">Change Template</a>
-            </div>
         </div>
     </div>
 
@@ -1455,14 +1451,7 @@
             const activeTasks = state.todayTasks.filter(t => !t.completed);
             
             if (activeTasks.length === 0) {
-                taskList.innerHTML = `
-                    <div class="empty-message">
-                        <svg viewBox="0 0 24 24" width="32" height="32" stroke="#94A3B8" stroke-width="2" fill="none" style="margin: 0 auto 12px;">
-                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                        All done! Add more tasks or reset today.
-                    </div>
-                `;
+                taskList.innerHTML = '<div class="empty-message">All done! Add more tasks or reset today.</div>';
                 return;
             }
             

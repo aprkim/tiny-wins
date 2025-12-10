@@ -1307,22 +1307,30 @@
 
             <!-- Sync Settings -->
             <div style="margin-top: 40px; padding: 20px; background: white; border-radius: 16px;">
-                <h3 style="margin: 0 0 16px 0; font-size: 18px; font-weight: 600; color: #333;">Cross-Device Sync</h3>
+                <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 600; color: #333;">Cross-Device Sync</h3>
                 <p style="margin: 0 0 16px 0; font-size: 14px; color: #666; line-height: 1.5;">Use a sync code to access your data on multiple devices (phone, tablet, computer).</p>
                 
-                <button class="action-btn" onclick="showSyncCodeModal()" style="width: 100%; margin-bottom: 12px;">
-                    <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; margin-right: 8px;">
-                        <path d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
-                    </svg>
-                    View My Sync Code
+                <div id="syncCodeCard" style="padding: 12px 14px; border: 1px solid #e5e7eb; border-radius: 12px; background: #f9fafb; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 8px; flex: 1 1 200px;">
+                        <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; color: #4A90E2;">
+                            <path d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <div style="font-size: 13px; color: #6b7280; line-height: 1.4;">
+                            <div style="font-weight: 600; color: #374151;">Your Sync Code</div>
+                            <div id="syncCodeText" style="font-family: monospace; color: #111827; word-break: break-all;">—</div>
+                        </div>
+                    </div>
+                    <button class="action-btn secondary" style="padding: 10px 12px; font-size: 13px;" onclick="copySyncCode()">Copy</button>
+                </div>
+
+                <button class="action-btn" onclick="refreshSyncCode()" style="width: 100%; margin-bottom: 12px;">
+                    Generate New Sync Code
                 </button>
                 
-                <button class="action-btn secondary" onclick="promptEnterSyncCode()" style="width: 100%;">
-                    <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; margin-right: 8px;">
-                        <path d="M12 4v16m8-8H4"/>
-                    </svg>
-                    Enter Sync Code from Another Device
-                </button>
+                <div style="display: flex; gap: 8px; margin-top: 8px;">
+                    <input id="enterSyncCodeInput" type="text" placeholder="Enter sync code from another device" style="flex: 1; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 10px; font-size: 14px;"/>
+                    <button class="action-btn secondary" onclick="submitSyncCode()" style="padding: 10px 14px;">Link</button>
+                </div>
             </div>
         </div>
     </div>
@@ -2520,6 +2528,7 @@
         } else {
           console.log('🔑 Using existing sync code:', code);
         }
+        updateSyncCodeDisplay(code);
         return code;
       }
 
@@ -2532,6 +2541,7 @@
         localStorage.setItem('tinywins_sync_code', code.trim().toLowerCase());
         syncCode = code.trim().toLowerCase();
         console.log('🔑 Sync code set:', syncCode);
+        updateSyncCodeDisplay(syncCode);
         
         // Restart Firebase sync with new code
         if (unsubscribe) unsubscribe();
@@ -2539,6 +2549,41 @@
         setupFirebaseSync();
         
         return true;
+      }
+
+      // Update Sync Code display card
+      function updateSyncCodeDisplay(code) {
+        const el = document.getElementById('syncCodeText');
+        if (el && code) el.textContent = code;
+      }
+
+      // Copy sync code
+      async function copySyncCode() {
+        const code = getSyncCode();
+        try {
+          await navigator.clipboard.writeText(code);
+          alert('Sync code copied!');
+        } catch (e) {
+          alert('Copy failed. Please copy manually:\n' + code);
+        }
+      }
+
+      // Generate a fresh sync code
+      function refreshSyncCode() {
+        const newCode = generateSyncCode();
+        setSyncCode(newCode);
+        alert('New sync code generated:\n\n' + newCode + '\n\nEnter on another device to link.');
+      }
+
+      // Submit sync code from input
+      function submitSyncCode() {
+        const input = document.getElementById('enterSyncCodeInput');
+        if (!input) return;
+        const code = input.value.trim().toLowerCase();
+        if (setSyncCode(code)) {
+          alert('✅ Sync code set. Reloading to sync data...');
+          location.reload();
+        }
       }
 
       try {
@@ -2708,9 +2753,11 @@
 
       // Sync Code UI Functions
       function showSyncCodeModal() {
-        const code = getSyncCode();
-        const message = `Your Sync Code:\n\n${code}\n\nEnter this code on another device to sync your data!`;
-        alert(message);
+        const card = document.getElementById('syncCodeCard');
+        if (card) {
+          card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        copySyncCode();
       }
 
       function promptEnterSyncCode() {

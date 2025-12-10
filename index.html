@@ -2755,9 +2755,10 @@
         if (!input) return;
         const code = input.value.trim().toLowerCase();
         if (setSyncCode(code)) {
-          setSyncStatus('Linked. Reloading...', '#BF3143');
+          setSyncStatus('Linked. Syncing...', '#BF3143');
           setLinkButtonsState('Linked', '#fff', '#BF3143', 'none');
-          setTimeout(() => location.reload(), 300);
+          // Keep the linked state visible for 3 seconds, then reload to pull data
+          setTimeout(() => location.reload(), 3000);
         } else {
           setLinkButtonsState('Link', '#5b6474', '#eef2f7', 'none');
         }
@@ -2849,41 +2850,21 @@
 
         // Listen for remote changes
         unsubscribe = userDoc.onSnapshot((doc) => {
-          if (doc.exists && !isFirstLoad) {
+          if (doc.exists) {
             const remoteData = doc.data();
             
-            // Update state from Firestore
+            // Always apply remote on first load; subsequent loads also update
             if (remoteData.todayTasks) state.todayTasks = remoteData.todayTasks;
             if (remoteData.templates) state.templates = remoteData.templates;
             if (remoteData.history) state.history = remoteData.history;
             if (remoteData.todayMode) state.todayMode = remoteData.todayMode;
             
-            // Re-render UI (only if functions exist)
             if (typeof renderTasks === 'function') renderTasks();
             if (typeof renderTemplates === 'function') renderTemplates();
             if (typeof renderHistory === 'function') renderHistory();
             if (typeof updateProgress === 'function') updateProgress();
             
-            console.log('✅ Synced from another device');
-          } else if (doc.exists && isFirstLoad) {
-            // First load - pull from Firestore
-            const remoteData = doc.data();
-            const localHasData = state.todayTasks.length > 0 || state.templates.length > 0;
-            
-            if (!localHasData && remoteData.todayTasks) {
-              // No local data, use remote
-              if (remoteData.todayTasks) state.todayTasks = remoteData.todayTasks;
-              if (remoteData.templates) state.templates = remoteData.templates;
-              if (remoteData.history) state.history = remoteData.history;
-              if (remoteData.todayMode) state.todayMode = remoteData.todayMode;
-              
-              if (typeof renderTasks === 'function') renderTasks();
-              if (typeof renderTemplates === 'function') renderTemplates();
-              if (typeof renderHistory === 'function') renderHistory();
-              if (typeof updateProgress === 'function') updateProgress();
-              
-              console.log('✅ Loaded from Firestore');
-            }
+            console.log(isFirstLoad ? '✅ Loaded from Firestore' : '✅ Synced from another device');
           } else if (!doc.exists && isFirstLoad) {
             // No remote data yet, push local data
             saveToFirestore();

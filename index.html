@@ -1356,7 +1356,7 @@
                 </div>
 
                 <!-- Disconnect from Sync Option -->
-                <div style="margin-bottom: 16px; padding: 16px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
+                <div id="disconnectCard" style="margin-bottom: 16px; padding: 16px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; display: none;">
                     <div style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: #475569; margin-bottom: 6px;">
                         <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; color: #64748b;">
                             <path d="M18 6L6 18M6 6l12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -1368,7 +1368,7 @@
                 </div>
 
                 <!-- Reset This Browser Option -->
-                <div style="margin-bottom: 16px; padding: 16px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
+                <div id="resetCard" style="margin-bottom: 16px; padding: 16px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; display: none;">
                     <div style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: #475569; margin-bottom: 6px;">
                         <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; color: #64748b;">
                             <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -1381,7 +1381,7 @@
                 </div>
 
                 <!-- Delete All Data Everywhere Option -->
-                <div style="padding: 16px; background: #FFF6F6; border-radius: 12px; border: 1px solid #F2D6D6;">
+                <div id="deleteEverywhereCard" style="padding: 16px; background: #FFF6F6; border-radius: 12px; border: 1px solid #F2D6D6; display: none;">
                     <div style="display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; color: #B94A48; margin-bottom: 6px;">
                         <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; color: #B94A48;">
                             <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -2615,17 +2615,15 @@
         return code.join('-');
       }
 
-      // Get or create sync code
+      // Get sync code (do NOT auto-create; user links explicitly)
       function getSyncCode() {
-        // Check localStorage first
-        let code = localStorage.getItem('tinywins_sync_code');
+        const code = localStorage.getItem('tinywins_sync_code');
         if (!code) {
-          code = generateSyncCode();
-          localStorage.setItem('tinywins_sync_code', code);
-          console.log('🔑 Generated new sync code:', code);
-            } else {
-          console.log('🔑 Using existing sync code:', code);
+          console.log('ℹ️ No sync code set');
+          updateSyncCodeDisplay('—');
+          return null;
         }
+        console.log('🔑 Using existing sync code:', code);
         updateSyncCodeDisplay(code);
         return code;
       }
@@ -2808,6 +2806,7 @@
         loadTemplatesView();
         loadHistoryView();
         updateProgressBar();
+        updateDataManagementState();
 
         // Re-sync from Firestore if available
         if (firebaseReady && syncCode) {
@@ -2849,7 +2848,15 @@
       function updateDataManagementState() {
         const resetBtn = document.getElementById('resetBrowserBtn');
         const resetNote = document.getElementById('resetBrowserNote');
+        const resetCard = document.getElementById('resetCard');
+        const disconnectCard = document.getElementById('disconnectCard');
+        const deleteCard = document.getElementById('deleteEverywhereCard');
         const isConnected = !!syncCode;
+
+        // Visibility rules
+        if (resetCard) resetCard.style.display = isConnected ? 'none' : 'block';
+        if (disconnectCard) disconnectCard.style.display = isConnected ? 'block' : 'none';
+        if (deleteCard) deleteCard.style.display = isConnected ? 'block' : 'none';
 
         if (resetBtn) {
           resetBtn.disabled = isConnected;

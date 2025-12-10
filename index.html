@@ -1185,7 +1185,7 @@
             <div class="header">
                 <div class="header-title">
                     Today's Tiny Wins
-                    <span id="syncStatus" style="font-size: 14px; margin-left: 6px; opacity: 0.6; cursor: help;"></span>
+                    <span id="syncStatus" style="font-size: 16px; margin-left: 8px; opacity: 1; cursor: help; color: #4A90E2;"></span>
                 </div>
                 <div class="header-date" id="todayDate"></div>
                 <button class="header-mode" id="todayMode" onclick="showTemplateSelectorModal()">
@@ -2539,6 +2539,13 @@
           isFirstLoad = false;
         }, (error) => {
           console.error('❌ Sync error:', error);
+          
+          // Handle permission errors gracefully
+          if (error.code === 'permission-denied') {
+            console.warn('⚠️ Firestore rules not deployed yet. Run: firebase deploy --only firestore:rules');
+            updateSyncStatus('⚠️', 'Sync unavailable - Deploy Firestore rules');
+            firebaseReady = false; // Stop trying to sync
+          }
         });
       }
 
@@ -2558,6 +2565,13 @@
           console.log('✅ Saved to Firestore');
         } catch (error) {
           console.error('❌ Save failed:', error);
+          
+          // Handle permission errors gracefully
+          if (error.code === 'permission-denied') {
+            console.warn('⚠️ Firestore rules not deployed. Using localStorage only.');
+            updateSyncStatus('⚠️', 'Sync unavailable - Deploy Firestore rules');
+            firebaseReady = false; // Stop trying to sync
+          }
         }
       }
 

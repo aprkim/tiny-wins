@@ -1305,31 +1305,36 @@
                 Clear History
             </button>
 
-            <!-- Sync Settings -->
-            <div style="margin-top: 40px; padding: 20px; background: white; border-radius: 16px;">
-                <h3 style="margin: 0 0 8px 0; font-size: 18px; font-weight: 600; color: #333;">Cross-Device Sync</h3>
+        </div>
+    </div>
+
+    <!-- ==================== SETTINGS VIEW ==================== -->
+    <div id="view-settings" class="view">
+        <div class="container">
+            <div class="header">
+                <div class="header-title">Settings</div>
+                <div class="header-date">Manage sync and preferences</div>
+            </div>
+
+            <div style="margin-top: 20px; padding: 20px; background: white; border-radius: 16px;">
+                <div style="display: flex; align-items: center; gap: 10px; margin: 0 0 8px 0;">
+                    <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; color: #BF3143;">
+                        <path d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <h3 style="margin: 0; font-size: 18px; font-weight: 600; color: #333;">Cross-Device Sync</h3>
+                </div>
                 <p style="margin: 0 0 16px 0; font-size: 14px; color: #666; line-height: 1.5;">Use a sync code to access your data on multiple devices (phone, tablet, computer).</p>
                 
-                <div id="syncCodeCard" style="padding: 12px 14px; border: 1px solid #e5e7eb; border-radius: 12px; background: #f9fafb; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-                    <div style="display: flex; align-items: center; gap: 8px; flex: 1 1 200px;">
-                        <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; color: #4A90E2;">
-                            <path d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        <div style="font-size: 13px; color: #6b7280; line-height: 1.4;">
-                            <div style="font-weight: 600; color: #374151;">Your Sync Code</div>
-                            <div id="syncCodeText" style="font-family: monospace; color: #111827; word-break: break-all;">—</div>
-                        </div>
+                <div id="syncCodeCard" style="padding: 12px 14px; border: 2px solid #e5e7eb; border-radius: 12px; background: #f9fafb; margin-bottom: 12px; display: flex; align-items: center; gap: 15px; min-height: 56px;">
+                    <div style="flex: 0 0 75%; min-width: 0;">
+                        <div id="syncCodeText" style="font-family: monospace; color: #111827; word-break: break-all; font-size: 15px; line-height: 1.4;">—</div>
                     </div>
-                    <button class="action-btn secondary" style="padding: 10px 12px; font-size: 13px;" onclick="copySyncCode()">Copy</button>
+                    <button style="flex: 0 0 20%; padding: 12px 14px; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; background: #BF3143; color: #fff; cursor: pointer; transition: background 0.2s; min-width: 0;" onclick="copySyncCode()">Copy</button>
                 </div>
 
-                <button class="action-btn" onclick="refreshSyncCode()" style="width: 100%; margin-bottom: 12px;">
-                    Generate New Sync Code
-                </button>
-                
-                <div style="display: flex; gap: 8px; margin-top: 8px;">
-                    <input id="enterSyncCodeInput" type="text" placeholder="Enter sync code from another device" style="flex: 1; padding: 10px 12px; border: 1px solid #e5e7eb; border-radius: 10px; font-size: 14px;"/>
-                    <button class="action-btn secondary" onclick="submitSyncCode()" style="padding: 10px 14px;">Link</button>
+                <div style="padding: 12px 14px; border: 2px solid #e5e7eb; border-radius: 12px; background: #f9fafb; display: flex; align-items: center; gap: 15px; min-height: 56px; margin-top: 12px;">
+                    <input id="enterSyncCodeInput" type="text" placeholder="Enter sync code from another device" style="flex: 0 0 75%; padding: 12px 14px; border: 1px solid #e5e7eb; border-radius: 10px; font-size: 14px; min-width: 0; background: white;">
+                    <button onclick="submitSyncCode()" style="flex: 0 0 20%; padding: 12px 14px; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; background: #eef2f7; color: #5b6474; cursor: pointer; transition: background 0.2s; min-width: 0; height: 100%;">Link</button>
                 </div>
             </div>
         </div>
@@ -1355,6 +1360,13 @@
             </svg>
             <span>History</span>
         </button>
+        <button class="nav-tab" data-tab="settings">
+            <svg viewBox="0 0 24 24">
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09A1.65 1.65 0 0 0 9 3.09V3a2 2 0 1 1 4 0v.09c0 .69.4 1.3 1 1.51h.09a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09c.21.6.82 1 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Settings</span>
+        </button>
     </nav>
 
     <!-- ==================== CONFIRMATION MODAL ==================== -->
@@ -1371,30 +1383,28 @@
 
     <!-- ==================== SYNC CODE MODAL ==================== -->
     <div class="modal-overlay hidden" id="syncModal">
-        <div class="modal" style="max-width: 520px; padding: 28px;">
+        <div class="modal" style="max-width: 520px; padding: 28px; position: relative;">
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
                 <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; color: #BF3143;">
                     <path d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
                 <div style="font-size: 22px; font-weight: 650; color: #1f2937;" id="syncModalTitle">Sync Code</div>
             </div>
+            <button aria-label="Close" onclick="closeSyncModal()" style="position: absolute; top: 18px; right: 18px; border: none; background: transparent; cursor: pointer; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
+                <svg viewBox="0 0 24 24" width="18" height="18" stroke="#6b7280" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+            </button>
             <div style="color: #6b7280; font-size: 14px; line-height: 1.6; margin-bottom: 16px;" id="syncModalSubtitle">
                 Use this code on another device to sync your data.
             </div>
-            <div style="padding: 14px 16px; border: 1px solid #e5e7eb; border-radius: 12px; background: #f9fafb; display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-                <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; color: #4A90E2;">
-                    <path d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                <div style="flex: 1;">
-                    <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.4px; color: #9ca3af; margin-bottom: 4px;">Your Sync Code</div>
+            <div style="padding: 14px 16px; border: 1px solid #e5e7eb; border-radius: 12px; background: #f9fafb; display: flex; align-items: center; gap: 15px; margin-bottom: 12px;">
+                <div style="flex: 7 1 0;">
                     <div id="syncModalCode" style="font-family: monospace; font-size: 15px; color: #111827; word-break: break-all;">—</div>
                 </div>
-                <button class="modal-btn cancel" style="padding: 10px 12px; min-width: 68px;" onclick="copySyncCode()">Copy</button>
+                <button style="flex: 2.4 1 0; padding: 12px 14px; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; background: #BF3143; color: #fff; cursor: pointer; transition: background 0.2s;" onclick="copySyncCode()">Copy</button>
             </div>
-            <div id="syncModalStatus" style="font-size: 13px; color: #10b981; min-height: 18px; margin-bottom: 16px;"></div>
-            <div style="display: flex; justify-content: flex-end; gap: 8px;">
-                <button class="modal-btn cancel" style="flex: 0 0 auto; padding: 10px 14px;" onclick="closeSyncModal()">Close</button>
-            </div>
+            <div id="syncModalStatus" style="font-size: 13px; color: #BF3143; min-height: 18px; margin-bottom: 4px;"></div>
         </div>
     </div>
 
@@ -1539,7 +1549,7 @@
             
             // Load last tab, but validate it exists
             const lastTab = localStorage.getItem(STORAGE_KEYS.LAST_TAB) || 'today';
-            const validTabs = ['today', 'templates', 'history'];
+            const validTabs = ['today', 'templates', 'history', 'settings'];
             state.activeTab = validTabs.includes(lastTab) ? lastTab : 'today';
             
             const savedTemplates = localStorage.getItem(STORAGE_KEYS.TEMPLATES);

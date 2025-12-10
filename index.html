@@ -1337,6 +1337,12 @@
                     <input id="enterSyncCodeInput" type="text" placeholder="Enter sync code from another device or browser" style="flex: 0 0 75%; padding: 12px 14px; border: 1px solid #e5e7eb; border-radius: 10px; font-size: 14px; min-width: 0; background: white; outline: none; box-shadow: none;">
                     <button data-sync-link="card" onclick="submitSyncCode()" style="flex: 0 0 20%; padding: 12px 14px; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; background: #eef2f7; color: #5b6474; cursor: pointer; transition: background 0.2s; min-width: 0; height: 100%; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1;">Link</button>
                 </div>
+
+            <div style="margin-top: 16px; padding: 16px; background: white; border-radius: 12px; border: 1px solid #e5e7eb;">
+                <div style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 8px;">Data Management</div>
+                <p style="margin: 0 0 12px 0; font-size: 14px; color: #666; line-height: 1.5;">Remove all tasks, templates, and history for this sync code.</p>
+                <button class="action-btn secondary" style="max-width: 200px; background: #f1f5f9; color: #6b7280; margin-bottom: 0;" onclick="confirmDeleteAll()">Delete All Data</button>
+            </div>
             </div>
         </div>
     </div>
@@ -2662,6 +2668,48 @@
           if (bg !== undefined) btn.style.background = bg;
           if (border !== undefined) btn.style.border = border;
         });
+      }
+
+      async function deleteAllData() {
+        // Reset local state
+        state.todayTasks = [];
+        state.templates = { weekday: [], weekend: [], holiday: [] };
+        state.history = [];
+        state.todayMode = 'weekday';
+
+        // Clear localStorage
+        localStorage.removeItem(STORAGE_KEYS.TODAY_TASKS);
+        localStorage.removeItem(STORAGE_KEYS.TEMPLATES);
+        localStorage.removeItem(STORAGE_KEYS.HISTORY);
+        localStorage.removeItem(STORAGE_KEYS.TODAY_MODE);
+        localStorage.removeItem(STORAGE_KEYS.TODAY_DATE);
+        localStorage.removeItem(STORAGE_KEYS.TODAY_MODE_OVERRIDE);
+
+        // Update UI
+        if (typeof renderTasks === 'function') renderTasks();
+        if (typeof renderTemplates === 'function') renderTemplates();
+        if (typeof renderHistory === 'function') renderHistory();
+        if (typeof updateProgress === 'function') updateProgress();
+
+        // Delete from Firestore
+        try {
+          if (firebaseReady && syncCode) {
+            await db.collection('tinyWins').doc(syncCode).delete();
+          }
+        } catch (e) {
+          console.error('Failed to delete remote data:', e);
+        }
+      }
+
+      function confirmDeleteAll() {
+        showConfirmModal(
+          'Delete all data',
+          'This will remove tasks, templates, and history for this sync code. Continue?',
+          async () => {
+            await deleteAllData();
+            setSyncStatus('All data deleted', '#BF3143');
+          }
+        );
       }
 
       function setSyncStatus(text, color) {

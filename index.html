@@ -958,6 +958,12 @@
             padding: 10px 0;
             font-size: 14px;
             color: #333;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .history-task:hover {
+            opacity: 0.8;
         }
 
         .history-task.template-task {
@@ -2361,8 +2367,8 @@
             historyList.innerHTML = state.history.map((entry, index) => {
                 const hasTasks = entry.tasks && entry.tasks.length > 0;
                 const tasksHtml = hasTasks
-                    ? entry.tasks.map(task => `
-                        <div class="history-task ${task.isTemplate ? 'template-task' : 'one-time-task'}">
+                    ? entry.tasks.map((task, taskIndex) => `
+                        <div class="history-task ${task.isTemplate ? 'template-task' : 'one-time-task'}" onclick="toggleHistoryTask(${index}, ${taskIndex}, event)">
                             <svg class="task-check ${task.completed ? 'checked' : ''}" viewBox="0 0 24 24" width="20" height="20">
                                 <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
                                 ${task.completed ? '<path d="M9 12l2 2 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' : ''}
@@ -2394,6 +2400,56 @@
                     </div>
                 `;
             }).join('');
+        }
+
+        function toggleHistoryTask(historyIndex, taskIndex, event) {
+            event.stopPropagation();
+            
+            const entry = state.history[historyIndex];
+            if (!entry || !entry.tasks || !entry.tasks[taskIndex]) return;
+            
+            const task = entry.tasks[taskIndex];
+            task.completed = !task.completed;
+            
+            // Recalculate stats
+            const completedCount = entry.tasks.filter(t => t.completed).length;
+            entry.tasksCompleted = completedCount;
+            const totalTasks = entry.tasks.length;
+            entry.tasksTotal = totalTasks;
+            entry.percentage = totalTasks > 0 ? Math.round((completedCount / totalTasks) * 100) : 0;
+            
+            saveHistory();
+            
+            // Update DOM directly to avoid closing the accordion
+            const historyItem = document.querySelector(`.history-item[data-index="${historyIndex}"]`);
+            if (historyItem) {
+                // Update stats
+                const completionEl = historyItem.querySelector('.history-completion');
+                const percentageEl = historyItem.querySelector('.history-percentage');
+                if (completionEl) completionEl.textContent = `${entry.tasksCompleted} / ${entry.tasksTotal} completed`;
+                if (percentageEl) percentageEl.textContent = `${entry.percentage}%`;
+                
+                // Update task item visual state
+                const taskEls = historyItem.querySelectorAll('.history-task');
+                if (taskEls[taskIndex]) {
+                    const taskEl = taskEls[taskIndex];
+                    const svg = taskEl.querySelector('.task-check');
+                    const textSpan = taskEl.querySelector('span');
+                    
+                    if (task.completed) {
+                        svg.classList.add('checked');
+                        if (!svg.querySelector('path')) {
+                            svg.innerHTML += '<path d="M9 12l2 2 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+                        }
+                        textSpan.classList.add('task-completed');
+                    } else {
+                        svg.classList.remove('checked');
+                        const path = svg.querySelector('path');
+                        if (path) path.remove();
+                        textSpan.classList.remove('task-completed');
+                    }
+                }
+            }
         }
 
         function toggleHistoryItem(index) {

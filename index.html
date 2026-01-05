@@ -3485,13 +3485,26 @@
         unsubscribe = userDoc.onSnapshot((doc) => {
           if (doc.exists) {
             const remoteData = doc.data();
-            
+
+            // Only apply remote changes if they're from another device (not local echo)
+            // Check metadata to see if this is a local write being echoed back
+            if (doc.metadata.hasPendingWrites) {
+              // This is our own write being echoed back, ignore it
+              console.log('⏭️ Ignoring local write echo');
+              return;
+            }
+
             // Always apply remote on first load; subsequent loads also update
             if (remoteData.todayTasks) state.todayTasks = remoteData.todayTasks;
             if (remoteData.templates) state.templates = remoteData.templates;
             if (remoteData.history) state.history = remoteData.history;
             if (remoteData.todayMode) state.todayMode = remoteData.todayMode;
-            
+
+            // Save to localStorage to keep it in sync
+            localStorage.setItem(STORAGE_KEYS.TODAY_TASKS, JSON.stringify(state.todayTasks));
+            localStorage.setItem(STORAGE_KEYS.TEMPLATES, JSON.stringify(state.templates));
+            localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(state.history));
+
             // Refresh the current view based on active tab
             const activeTab = state.activeTab;
             if (activeTab === 'today') {
@@ -3502,14 +3515,14 @@
             } else if (activeTab === 'history') {
                 loadHistoryView();
             }
-            
+
             console.log(isFirstLoad ? '✅ Loaded from Firestore' : '✅ Synced from another device');
           } else if (!doc.exists && isFirstLoad) {
             // No remote data yet, push local data
             saveToFirestore();
             console.log('✅ Initial sync: Local → Firestore');
           }
-          
+
           isFirstLoad = false;
         }, (error) => {
           console.error('❌ Sync error:', error);

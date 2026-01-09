@@ -586,6 +586,90 @@
             font-size: 15px;
         }
 
+        /* ==================== SCHEDULE ==================== */
+        .schedule-date-picker {
+            padding: 6px 12px;
+            border: 1px solid #CBD5E1;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #334155;
+            cursor: pointer;
+        }
+
+        .schedule-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .schedule-block {
+            display: flex;
+            align-items: center;
+            padding: 14px 16px;
+            background: #F8FAFC;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            transition: all 0.2s;
+            border: 2px solid #E2E8F0;
+            gap: 12px;
+        }
+
+        .schedule-block:hover {
+            background: #F1F5F9;
+            border-color: #CBD5E1;
+        }
+
+        .schedule-block.done {
+            opacity: 0.5;
+        }
+
+        .schedule-block.done .schedule-text,
+        .schedule-block.done .schedule-time {
+            text-decoration: line-through;
+            color: #94A3B8;
+        }
+
+        .schedule-time {
+            font-size: 14px;
+            font-weight: 600;
+            color: #BF3143;
+            white-space: nowrap;
+            min-width: 100px;
+        }
+
+        .schedule-text {
+            flex: 1;
+            font-size: 15px;
+            color: #334155;
+            word-break: break-word;
+        }
+
+        .schedule-actions {
+            display: flex;
+            gap: 8px;
+            margin-left: auto;
+        }
+
+        .schedule-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            color: #64748B;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .schedule-btn:hover {
+            background: #E2E8F0;
+            color: #334155;
+        }
+
+        .schedule-btn.delete:hover {
+            background: #FEF2F2;
+            color: #DC2626;
+        }
+
         /* ==================== ADD TASK SECTION ==================== */
         .add-task-section {
             background: white;
@@ -1525,6 +1609,49 @@
         </div>
     </div>
 
+    <!-- ==================== SCHEDULE VIEW ==================== -->
+    <div id="view-schedule" class="view">
+        <div class="container">
+            <a href="https://tinywins.space" class="suite-back-link">← TinyWins</a>
+            <div class="header">
+                <div class="header-title">Today's Schedule</div>
+                <div class="header-date">
+                    <input type="date" id="scheduleDatePicker" class="schedule-date-picker" />
+                </div>
+            </div>
+
+            <!-- Add Time Block Section -->
+            <div class="add-task-section" style="margin-bottom: 24px;">
+                <div class="section-title" style="margin-bottom: 12px;">
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="#F59E0B" stroke-width="2" fill="none">
+                        <path d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Add Time Block
+                </div>
+                <div style="display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
+                    <input type="time" id="scheduleStartTime" placeholder="Start" style="flex: 1; min-width: 100px; padding: 10px; border: 1px solid #CBD5E1; border-radius: 8px; font-size: 14px;">
+                    <input type="time" id="scheduleEndTime" placeholder="End" style="flex: 1; min-width: 100px; padding: 10px; border: 1px solid #CBD5E1; border-radius: 8px; font-size: 14px;">
+                    <input type="text" id="scheduleTaskInput" placeholder="What will you do?" style="flex: 2; min-width: 200px; padding: 10px; border: 1px solid #CBD5E1; border-radius: 8px; font-size: 14px;">
+                    <button id="scheduleAddBtn" onclick="addScheduleBlock()" class="action-btn" style="padding: 10px 20px; white-space: nowrap;">Add</button>
+                </div>
+                <button onclick="copyYesterdaySchedule()" class="action-btn secondary" style="background: #F8FAFC; color: #64748B; border: 1px solid #CBD5E1;">Copy from Yesterday</button>
+            </div>
+
+            <!-- Schedule List Section -->
+            <div class="task-section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none">
+                            <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        Time Blocks
+                    </div>
+                </div>
+                <div id="scheduleList" class="schedule-list"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- ==================== BOTTOM NAVIGATION ==================== -->
     <nav class="bottom-nav hidden" id="bottomNav">
         <button class="nav-tab active" data-tab="today">
@@ -1532,6 +1659,12 @@
                 <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
             </svg>
             <span>Today</span>
+        </button>
+        <button class="nav-tab" data-tab="schedule">
+            <svg viewBox="0 0 24 24">
+                <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Schedule</span>
         </button>
         <button class="nav-tab" data-tab="templates">
             <svg viewBox="0 0 24 24">
@@ -1628,7 +1761,8 @@
             TODAY_MODE: 'tinyWins_todayMode',
             TODAY_DATE: 'tinyWins_todayDate',
             TODAY_MODE_OVERRIDE: 'tinyWins_todayModeOverride',
-            HISTORY: 'tinyWins_history'
+            HISTORY: 'tinyWins_history',
+            SCHEDULE: 'tinyWins_schedule'
         };
 
         // ==================== SAMPLE TEMPLATES ====================
@@ -1685,7 +1819,9 @@
                 weekend: [],
                 holiday: []
             },
-            history: []
+            history: [],
+            scheduleByDate: {},  // { "YYYY-MM-DD": [{ id, start, end, text, done, order }] }
+            activeScheduleDate: ''  // Currently selected date in schedule view
         };
 
         // Local UI state for quick add important toggle
@@ -1715,11 +1851,9 @@
 
         function loadState() {
             state.setupComplete = localStorage.getItem(STORAGE_KEYS.SETUP_COMPLETE) === 'true';
-            
-            // Load last tab, but validate it exists
-            const lastTab = localStorage.getItem(STORAGE_KEYS.LAST_TAB) || 'today';
-            const validTabs = ['today', 'templates', 'history', 'settings'];
-            state.activeTab = validTabs.includes(lastTab) ? lastTab : 'today';
+
+            // Always start on Today tab on page load
+            state.activeTab = 'today';
             
             const savedTemplates = localStorage.getItem(STORAGE_KEYS.TEMPLATES);
             if (savedTemplates) {
@@ -1757,6 +1891,9 @@
             if (savedHistory) {
                 state.history = JSON.parse(savedHistory);
             }
+
+            // Load schedule data
+            loadScheduleFromStorage();
         }
 
         // ==================== ONBOARDING ====================
@@ -2083,6 +2220,7 @@
             }
             
             if (tabName === 'today') loadTodayView();
+            else if (tabName === 'schedule') loadScheduleView();
             else if (tabName === 'templates') loadTemplatesView();
             else if (tabName === 'history') loadHistoryView();
         }
@@ -2563,6 +2701,223 @@
             }
         }
 
+        // ==================== SCHEDULE VIEW ====================
+        function loadScheduleView() {
+            const date = state.activeScheduleDate || getTodayString();
+            state.activeScheduleDate = date;
+
+            // Set date picker value
+            document.getElementById('scheduleDatePicker').value = date;
+
+            // Render schedule list
+            renderScheduleList();
+        }
+
+        function renderScheduleList() {
+            const date = state.activeScheduleDate;
+            const blocks = state.scheduleByDate[date] || [];
+            const container = document.getElementById('scheduleList');
+
+            if (blocks.length === 0) {
+                container.innerHTML = '<div class="empty-message">No time blocks scheduled for this date.</div>';
+                return;
+            }
+
+            // Sort blocks by start time
+            const sortedBlocks = [...blocks].sort((a, b) => {
+                return a.start.localeCompare(b.start);
+            });
+
+            container.innerHTML = sortedBlocks.map(block => `
+                <div class="schedule-block ${block.done ? 'done' : ''}" data-id="${block.id}">
+                    <input type="checkbox" class="task-checkbox" ${block.done ? 'checked' : ''}
+                           onchange="toggleScheduleBlock(${block.id})">
+                    <div class="schedule-time">${block.start}–${block.end}</div>
+                    <div class="schedule-text">${escapeHtml(block.text)}</div>
+                    <div class="schedule-actions">
+                        <button class="schedule-btn" onclick="editScheduleBlock(${block.id})">Edit</button>
+                        <button class="schedule-btn delete" onclick="deleteScheduleBlock(${block.id})">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addScheduleBlock() {
+            const startInput = document.getElementById('scheduleStartTime');
+            const endInput = document.getElementById('scheduleEndTime');
+            const taskInput = document.getElementById('scheduleTaskInput');
+
+            const start = startInput.value.trim();
+            const end = endInput.value.trim();
+            const text = taskInput.value.trim();
+
+            if (!start || !end || !text) {
+                showAlertModal('Missing Information', 'Please fill in start time, end time, and task description.');
+                return;
+            }
+
+            if (start >= end) {
+                showAlertModal('Invalid Time Range', 'End time must be after start time.');
+                return;
+            }
+
+            const date = state.activeScheduleDate;
+            if (!state.scheduleByDate[date]) {
+                state.scheduleByDate[date] = [];
+            }
+
+            const newBlock = {
+                id: Date.now(),
+                start: start,
+                end: end,
+                text: text,
+                done: false,
+                order: state.scheduleByDate[date].length
+            };
+
+            state.scheduleByDate[date].push(newBlock);
+            saveSchedule();
+            renderScheduleList();
+
+            // Clear inputs
+            startInput.value = '';
+            endInput.value = '';
+            taskInput.value = '';
+        }
+
+        function toggleScheduleBlock(blockId) {
+            const date = state.activeScheduleDate;
+            const blocks = state.scheduleByDate[date] || [];
+            const block = blocks.find(b => b.id === blockId);
+
+            if (block) {
+                block.done = !block.done;
+                saveSchedule();
+                renderScheduleList();
+            }
+        }
+
+        function editScheduleBlock(blockId) {
+            const date = state.activeScheduleDate;
+            const blocks = state.scheduleByDate[date] || [];
+            const block = blocks.find(b => b.id === blockId);
+
+            if (!block) return;
+
+            const newStart = prompt('Start time (HH:MM):', block.start);
+            if (newStart === null) return;
+
+            const newEnd = prompt('End time (HH:MM):', block.end);
+            if (newEnd === null) return;
+
+            const newText = prompt('Task:', block.text);
+            if (newText === null) return;
+
+            if (!newStart || !newEnd || !newText) {
+                showAlertModal('Invalid Input', 'All fields are required.');
+                return;
+            }
+
+            if (newStart >= newEnd) {
+                showAlertModal('Invalid Time Range', 'End time must be after start time.');
+                return;
+            }
+
+            block.start = newStart;
+            block.end = newEnd;
+            block.text = newText;
+
+            saveSchedule();
+            renderScheduleList();
+        }
+
+        function deleteScheduleBlock(blockId) {
+            showConfirmModal(
+                'Delete Time Block',
+                'Are you sure you want to delete this time block?',
+                () => {
+                    const date = state.activeScheduleDate;
+                    const blocks = state.scheduleByDate[date] || [];
+                    state.scheduleByDate[date] = blocks.filter(b => b.id !== blockId);
+
+                    if (state.scheduleByDate[date].length === 0) {
+                        delete state.scheduleByDate[date];
+                    }
+
+                    saveSchedule();
+                    renderScheduleList();
+                }
+            );
+        }
+
+        function copyYesterdaySchedule() {
+            const date = state.activeScheduleDate;
+            const yesterday = getYesterdayString(date);
+            const yesterdayBlocks = state.scheduleByDate[yesterday] || [];
+
+            if (yesterdayBlocks.length === 0) {
+                showAlertModal('No Data', 'No schedule found for yesterday.');
+                return;
+            }
+
+            showConfirmModal(
+                'Copy from Yesterday',
+                `Copy ${yesterdayBlocks.length} time blocks from yesterday?`,
+                () => {
+                    if (!state.scheduleByDate[date]) {
+                        state.scheduleByDate[date] = [];
+                    }
+
+                    const copiedBlocks = yesterdayBlocks.map((block, index) => ({
+                        id: Date.now() + index,
+                        start: block.start,
+                        end: block.end,
+                        text: block.text,
+                        done: false,
+                        order: state.scheduleByDate[date].length + index
+                    }));
+
+                    state.scheduleByDate[date].push(...copiedBlocks);
+                    saveSchedule();
+                    renderScheduleList();
+                }
+            );
+        }
+
+        function onScheduleDateChange() {
+            const picker = document.getElementById('scheduleDatePicker');
+            state.activeScheduleDate = picker.value;
+            renderScheduleList();
+        }
+
+        function getYesterdayString(dateString) {
+            const date = new Date(dateString + 'T00:00:00');
+            date.setDate(date.getDate() - 1);
+            return date.toISOString().split('T')[0];
+        }
+
+        function saveSchedule() {
+            localStorage.setItem(STORAGE_KEYS.SCHEDULE, JSON.stringify(state.scheduleByDate));
+
+            // Sync to Firestore if connected
+            if (syncCode && firebaseReady) {
+                saveToFirestore();
+            }
+        }
+
+        function loadScheduleFromStorage() {
+            const saved = localStorage.getItem(STORAGE_KEYS.SCHEDULE);
+            if (saved) {
+                state.scheduleByDate = JSON.parse(saved);
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
         // ==================== MODAL ====================
         let modalCallback = null;
 
@@ -2808,7 +3163,43 @@
             document.querySelectorAll('.template-tab').forEach(tab => {
                 tab.addEventListener('click', () => switchTemplateMode(tab.dataset.mode));
             });
-            
+
+            // Schedule tab
+            const scheduleStartInput = document.getElementById('scheduleStartTime');
+            const scheduleEndInput = document.getElementById('scheduleEndTime');
+            const scheduleTextInput = document.getElementById('scheduleTaskInput');
+            const scheduleAddBtn = document.getElementById('scheduleAddBtn');
+
+            scheduleTextInput.addEventListener('input', () => {
+                scheduleAddBtn.disabled = !scheduleTextInput.value.trim() || !scheduleStartInput.value || !scheduleEndInput.value;
+            });
+            scheduleStartInput.addEventListener('input', () => {
+                scheduleAddBtn.disabled = !scheduleTextInput.value.trim() || !scheduleStartInput.value || !scheduleEndInput.value;
+            });
+            scheduleEndInput.addEventListener('input', () => {
+                scheduleAddBtn.disabled = !scheduleTextInput.value.trim() || !scheduleStartInput.value || !scheduleEndInput.value;
+            });
+
+            // After selecting time, move to next field
+            scheduleStartInput.addEventListener('change', () => {
+                scheduleEndInput.focus();
+            });
+            scheduleEndInput.addEventListener('change', () => {
+                scheduleTextInput.focus();
+            });
+
+            // Add on Enter key
+            scheduleTextInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && scheduleTextInput.value.trim() && scheduleStartInput.value && scheduleEndInput.value) {
+                    addScheduleBlock();
+                }
+            });
+
+            scheduleAddBtn.addEventListener('click', addScheduleBlock);
+
+            document.getElementById('scheduleDatePicker').addEventListener('change', onScheduleDateChange);
+            document.getElementById('copyYesterdayBtn').addEventListener('click', copyYesterdaySchedule);
+
             // History tab
             document.getElementById('clearHistoryBtn').addEventListener('click', clearHistory);
             
@@ -3237,7 +3628,8 @@
             templates: state.templates,
             todayMode: state.todayMode,
             todayDate: state.todayDate,
-            todayTasks: state.todayTasks
+            todayTasks: state.todayTasks,
+            scheduleByDate: state.scheduleByDate
           };
 
           if (includeHistory) {
@@ -3339,6 +3731,11 @@
           if (importedData.todayDate) {
             state.todayDate = importedData.todayDate;
             localStorage.setItem(STORAGE_KEYS.TODAY_DATE, importedData.todayDate);
+          }
+
+          if (importedData.scheduleByDate) {
+            state.scheduleByDate = importedData.scheduleByDate;
+            saveSchedule();
           }
 
           // Update UI
@@ -3557,17 +3954,21 @@
             if (remoteData.templates) state.templates = remoteData.templates;
             if (remoteData.history) state.history = remoteData.history;
             if (remoteData.todayMode) state.todayMode = remoteData.todayMode;
+            if (remoteData.scheduleByDate) state.scheduleByDate = remoteData.scheduleByDate;
 
             // Save to localStorage to keep it in sync
             localStorage.setItem(STORAGE_KEYS.TODAY_TASKS, JSON.stringify(state.todayTasks));
             localStorage.setItem(STORAGE_KEYS.TEMPLATES, JSON.stringify(state.templates));
             localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(state.history));
+            localStorage.setItem(STORAGE_KEYS.SCHEDULE, JSON.stringify(state.scheduleByDate));
 
             // Refresh the current view based on active tab
             const activeTab = state.activeTab;
             if (activeTab === 'today') {
                 renderTodayTasks();
                 updateProgressBar();
+            } else if (activeTab === 'schedule') {
+                renderScheduleList();
             } else if (activeTab === 'templates') {
                 loadTemplatesView();
             } else if (activeTab === 'history') {
@@ -3628,6 +4029,7 @@
             templates: state.templates,
             history: state.history,
             todayMode: state.todayMode,
+            scheduleByDate: state.scheduleByDate,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
           }, { merge: true });
           

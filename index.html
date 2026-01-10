@@ -610,7 +610,7 @@
             margin-bottom: 10px;
             transition: all 0.2s;
             border: 2px solid #E2E8F0;
-            gap: 12px;
+            gap: 8px;
         }
 
         .schedule-block:hover {
@@ -637,7 +637,15 @@
             padding: 4px 6px;
             background: transparent;
             transition: all 0.2s;
-            width: 90px;
+            width: 70px;
+        }
+
+        .schedule-time-input::-webkit-calendar-picker-indicator {
+            display: none;
+        }
+
+        .schedule-time-input::-webkit-clear-button {
+            display: none;
         }
 
         .schedule-time-input:hover {
@@ -654,7 +662,7 @@
         .schedule-time-separator {
             color: #BF3143;
             font-weight: 600;
-            padding: 0 4px;
+            padding: 0 2px;
         }
 
         .schedule-text-input {
@@ -704,6 +712,16 @@
         #scheduleEndTime:focus {
             outline: none;
             border-color: #BF3143;
+        }
+
+        #scheduleStartTime::-webkit-calendar-picker-indicator,
+        #scheduleEndTime::-webkit-calendar-picker-indicator {
+            display: none;
+        }
+
+        #scheduleStartTime::-webkit-clear-button,
+        #scheduleEndTime::-webkit-clear-button {
+            display: none;
         }
 
         /* ==================== ADD TASK SECTION ==================== */
@@ -1664,13 +1682,12 @@
                     </svg>
                     Add Time Block
                 </div>
-                <div style="display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap;">
-                    <input type="time" id="scheduleStartTime" placeholder="Start" style="flex: 1; min-width: 100px; padding: 10px; border: 1px solid #CBD5E1; border-radius: 8px; font-size: 14px;">
-                    <input type="time" id="scheduleEndTime" placeholder="End" style="flex: 1; min-width: 100px; padding: 10px; border: 1px solid #CBD5E1; border-radius: 8px; font-size: 14px;">
-                    <input type="text" id="scheduleTaskInput" placeholder="What will you do?" style="flex: 2; min-width: 200px; padding: 10px; border: 1px solid #CBD5E1; border-radius: 8px; font-size: 14px;">
-                    <button id="scheduleAddBtn" class="action-btn" style="padding: 10px 20px; white-space: nowrap;">Add</button>
+                <div style="display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap;">
+                    <input type="time" id="scheduleStartTime" placeholder="Start" style="width: 90px; padding: 8px; border: 1px solid #CBD5E1; border-radius: 8px; font-size: 14px;">
+                    <input type="time" id="scheduleEndTime" placeholder="End" style="width: 90px; padding: 8px; border: 1px solid #CBD5E1; border-radius: 8px; font-size: 14px;">
+                    <input type="text" id="scheduleTaskInput" placeholder="What will you do?" style="flex: 1; min-width: 200px; padding: 8px 10px; border: 1px solid #CBD5E1; border-radius: 8px; font-size: 14px;">
+                    <button id="scheduleAddBtn" class="action-btn" style="padding: 8px 16px; white-space: nowrap;">Add</button>
                 </div>
-                <button id="copyYesterdayBtn" class="action-btn secondary" style="background: #F8FAFC; color: #64748B; border: 1px solid #CBD5E1;">Copy from Yesterday</button>
             </div>
 
             <!-- Schedule List Section -->
@@ -2883,22 +2900,16 @@
         }
 
         function deleteScheduleBlock(blockId) {
-            showConfirmModal(
-                'Delete Time Block',
-                'Are you sure you want to delete this time block?',
-                () => {
-                    const date = state.activeScheduleDate;
-                    const blocks = state.scheduleByDate[date] || [];
-                    state.scheduleByDate[date] = blocks.filter(b => b.id !== blockId);
+            const date = state.activeScheduleDate;
+            const blocks = state.scheduleByDate[date] || [];
+            state.scheduleByDate[date] = blocks.filter(b => b.id !== blockId);
 
-                    if (state.scheduleByDate[date].length === 0) {
-                        delete state.scheduleByDate[date];
-                    }
+            if (state.scheduleByDate[date].length === 0) {
+                delete state.scheduleByDate[date];
+            }
 
-                    saveSchedule();
-                    renderScheduleList();
-                }
-            );
+            saveSchedule();
+            renderScheduleList();
         }
 
         function copyYesterdaySchedule() {

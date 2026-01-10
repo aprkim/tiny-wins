@@ -628,44 +628,73 @@
             color: #94A3B8;
         }
 
-        .schedule-time {
+        .schedule-time-input {
             font-size: 14px;
             font-weight: 600;
             color: #BF3143;
-            white-space: nowrap;
-            min-width: 100px;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            padding: 4px 6px;
+            background: transparent;
+            transition: all 0.2s;
+            width: 90px;
         }
 
-        .schedule-text {
+        .schedule-time-input:hover {
+            background: #F8FAFC;
+            border-color: #E2E8F0;
+        }
+
+        .schedule-time-input:focus {
+            outline: none;
+            background: white;
+            border-color: #BF3143;
+        }
+
+        .schedule-time-separator {
+            color: #BF3143;
+            font-weight: 600;
+            padding: 0 4px;
+        }
+
+        .schedule-text-input {
             flex: 1;
             font-size: 15px;
             color: #334155;
-            word-break: break-word;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            padding: 6px 10px;
+            background: transparent;
+            transition: all 0.2s;
+            min-width: 150px;
         }
 
-        .schedule-actions {
-            display: flex;
-            gap: 8px;
-            margin-left: auto;
+        .schedule-text-input:hover {
+            background: #F8FAFC;
+            border-color: #E2E8F0;
         }
 
-        .schedule-btn {
+        .schedule-text-input:focus {
+            outline: none;
+            background: white;
+            border-color: #BF3143;
+        }
+
+        .schedule-btn-icon {
             background: none;
             border: none;
             cursor: pointer;
-            padding: 4px 8px;
+            padding: 6px;
             border-radius: 6px;
-            color: #64748B;
-            font-size: 13px;
+            color: #94A3B8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: all 0.2s;
+            margin-left: 8px;
         }
 
-        .schedule-btn:hover {
-            background: #E2E8F0;
-            color: #334155;
-        }
-
-        .schedule-btn.delete:hover {
+        .schedule-btn-icon:hover {
             background: #FEF2F2;
             color: #DC2626;
         }
@@ -2739,12 +2768,19 @@
                 <div class="schedule-block ${block.done ? 'done' : ''}" data-id="${block.id}">
                     <input type="checkbox" class="task-checkbox" ${block.done ? 'checked' : ''}
                            onchange="toggleScheduleBlock(${block.id})">
-                    <div class="schedule-time">${block.start}–${block.end}</div>
-                    <div class="schedule-text">${escapeHtml(block.text)}</div>
-                    <div class="schedule-actions">
-                        <button class="schedule-btn" onclick="editScheduleBlock(${block.id})">Edit</button>
-                        <button class="schedule-btn delete" onclick="deleteScheduleBlock(${block.id})">Delete</button>
-                    </div>
+                    <input type="time" class="schedule-time-input" value="${block.start}"
+                           onchange="updateScheduleBlockTime(${block.id}, 'start', this.value)" />
+                    <span class="schedule-time-separator">–</span>
+                    <input type="time" class="schedule-time-input" value="${block.end}"
+                           onchange="updateScheduleBlockTime(${block.id}, 'end', this.value)" />
+                    <input type="text" class="schedule-text-input" value="${escapeHtml(block.text)}"
+                           onchange="updateScheduleBlockText(${block.id}, this.value)"
+                           placeholder="What will you do?" />
+                    <button class="schedule-btn-icon delete" onclick="deleteScheduleBlock(${block.id})" title="Delete">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none">
+                            <path d="M18 6L6 18M6 6l12 12"/>
+                        </svg>
+                    </button>
                 </div>
             `).join('');
         }
@@ -2806,36 +2842,42 @@
             }
         }
 
-        function editScheduleBlock(blockId) {
+        function updateScheduleBlockTime(blockId, field, value) {
             const date = state.activeScheduleDate;
             const blocks = state.scheduleByDate[date] || [];
             const block = blocks.find(b => b.id === blockId);
 
             if (!block) return;
 
-            const newStart = prompt('Start time (HH:MM):', block.start);
-            if (newStart === null) return;
+            const oldValue = block[field];
+            block[field] = value;
 
-            const newEnd = prompt('End time (HH:MM):', block.end);
-            if (newEnd === null) return;
-
-            const newText = prompt('Task:', block.text);
-            if (newText === null) return;
-
-            if (!newStart || !newEnd || !newText) {
-                showAlertModal('Invalid Input', 'All fields are required.');
-                return;
-            }
-
-            if (newStart >= newEnd) {
+            // Validate time range
+            if (block.start >= block.end) {
                 showAlertModal('Invalid Time Range', 'End time must be after start time.');
+                block[field] = oldValue; // Revert
+                renderScheduleList();
                 return;
             }
 
-            block.start = newStart;
-            block.end = newEnd;
-            block.text = newText;
+            saveSchedule();
+            renderScheduleList();
+        }
 
+        function updateScheduleBlockText(blockId, text) {
+            const date = state.activeScheduleDate;
+            const blocks = state.scheduleByDate[date] || [];
+            const block = blocks.find(b => b.id === blockId);
+
+            if (!block) return;
+
+            if (!text.trim()) {
+                showAlertModal('Invalid Input', 'Task description cannot be empty.');
+                renderScheduleList();
+                return;
+            }
+
+            block.text = text;
             saveSchedule();
             renderScheduleList();
         }
@@ -3197,8 +3239,33 @@
                 scheduleTextInput.focus();
             });
 
-            // Tab navigation is handled natively by the browser
-            // Users can use Tab to move forward and Shift+Tab to move backward
+            // Arrow key navigation between fields
+            scheduleStartInput.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    scheduleEndInput.focus();
+                }
+            });
+
+            scheduleEndInput.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    scheduleStartInput.focus();
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    scheduleTextInput.focus();
+                }
+            });
+
+            scheduleTextInput.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft' && scheduleTextInput.selectionStart === 0) {
+                    e.preventDefault();
+                    scheduleEndInput.focus();
+                } else if (e.key === 'ArrowRight' && scheduleTextInput.selectionStart === scheduleTextInput.value.length) {
+                    e.preventDefault();
+                    scheduleAddBtn.focus();
+                }
+            });
 
             // Add on Enter key
             scheduleTextInput.addEventListener('keypress', (e) => {

@@ -1445,7 +1445,7 @@
             <div class="header">
                 <div class="header-title">
                     Today's Tiny Do
-                    <span id="syncStatus" style="font-size: 16px; margin-left: 8px; opacity: 1; cursor: pointer; color: #4A90E2;" onclick="showSyncCodeModal()" title="Click to view/manage sync code"></span>
+                    <span id="syncStatus" style="font-size: 16px; margin-left: 8px; opacity: 0; cursor: pointer; color: #4A90E2;" onclick="showSyncCodeModal()" title="Initializing sync..."></span>
         </div>
                 <div class="header-date" id="todayDate"></div>
                 <button class="header-mode" id="todayMode" onclick="showTemplateSelectorModal()">
@@ -3987,15 +3987,15 @@
 
         console.log('✅ Firebase initialized');
 
-        // Auto sign-in anonymously
+        // Auto sign-in anonymously with retry logic
         auth.onAuthStateChanged((user) => {
           if (user) {
             currentUserId = user.uid;
             firebaseReady = true;
-            
+
             // Get or generate sync code
             syncCode = getSyncCode();
-            
+
             console.log('✅ User ID:', user.uid);
             console.log('🔑 Sync Code:', syncCode);
             updateSyncStatus('☁️', 'Syncing across devices');
@@ -4003,12 +4003,28 @@
             updateSyncPill(!!syncCode);
             setupFirebaseSync();
           } else {
-            auth.signInAnonymously()
-              .then(() => console.log('✅ Signed in anonymously'))
-              .catch((err) => {
-                console.error('❌ Auth failed:', err);
-                updateSyncStatus('⚠️', 'Sync unavailable');
-              });
+            // Retry authentication up to 3 times
+            let authRetries = 0;
+            const maxRetries = 3;
+
+            const attemptAuth = () => {
+              auth.signInAnonymously()
+                .then(() => console.log('✅ Signed in anonymously'))
+                .catch((err) => {
+                  authRetries++;
+                  console.error(`❌ Auth failed (attempt ${authRetries}/${maxRetries}):`, err);
+
+                  if (authRetries < maxRetries) {
+                    // Retry after delay
+                    setTimeout(attemptAuth, 1000 * authRetries);
+                  } else {
+                    // Only show warning after all retries exhausted
+                    updateSyncStatus('⚠️', 'Sync unavailable - Check connection');
+                  }
+                });
+            };
+
+            attemptAuth();
           }
         });
 
@@ -4023,6 +4039,10 @@
         if (statusEl) {
           statusEl.textContent = icon;
           statusEl.title = title;
+          // Fade in the icon once we have a status
+          if (icon) {
+            statusEl.style.opacity = '1';
+          }
         }
       }
 

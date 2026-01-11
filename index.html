@@ -317,6 +317,7 @@
             padding: 24px;
             margin-bottom: 20px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            position: relative;
         }
 
         .header-title {
@@ -324,6 +325,43 @@
             font-weight: 700;
             color: #333;
             margin-bottom: 4px;
+        }
+
+        .header-refresh-btn {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .header-refresh-btn:hover {
+            background-color: #F1F5F9;
+        }
+
+        .header-refresh-btn svg {
+            width: 20px;
+            height: 20px;
+            stroke: #64748B;
+            stroke-width: 2;
+            fill: none;
+            transition: transform 0.3s ease;
+        }
+
+        .header-refresh-btn.spinning svg {
+            animation: spin 0.6s linear;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
 
         .header-date {
@@ -1388,6 +1426,17 @@
                 font-size: 22px;
             }
 
+            .header-refresh-btn {
+                top: 20px;
+                right: 20px;
+                padding: 6px;
+            }
+
+            .header-refresh-btn svg {
+                width: 18px;
+                height: 18px;
+            }
+
             .task-section, .add-task-section, .progress-section {
                 padding: 16px;
             }
@@ -1530,6 +1579,11 @@
         <div class="container">
             <a href="https://tinywins.space" class="suite-back-link">← TinyWins</a>
             <div class="header">
+                <button class="header-refresh-btn" id="todayRefreshBtn" title="Refresh tasks">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
                 <div class="header-title">
                     Today's Tiny Wins
                     <span id="syncStatus" style="font-size: 16px; margin-left: 8px; opacity: 0; cursor: pointer; color: #4A90E2;" onclick="showSyncCodeModal()" title="Initializing sync..."></span>
@@ -3328,7 +3382,13 @@
                     importanceToggleBtn.setAttribute('aria-pressed', isImportant.toString());
                 });
             }
-            
+
+            // Refresh button
+            const todayRefreshBtn = document.getElementById('todayRefreshBtn');
+            if (todayRefreshBtn) {
+                todayRefreshBtn.addEventListener('click', refreshTodayView);
+            }
+
             document.getElementById('reloadTemplateBtn').addEventListener('click', reloadFromTemplate);
             
             // Templates tab
@@ -4289,6 +4349,59 @@
             updateSyncStatus('⚠️', 'Sync unavailable - Deploy Firestore rules');
             firebaseReady = false; // Stop trying to sync
           }
+        }
+      }
+
+      // Manual refresh function for Today view
+      async function refreshTodayView() {
+        const refreshBtn = document.getElementById('todayRefreshBtn');
+        if (!refreshBtn) return;
+
+        // Add spinning animation
+        refreshBtn.classList.add('spinning');
+
+        try {
+          // If synced, force fetch from Firestore
+          if (firebaseReady && syncCode) {
+            console.log('🔄 Manual refresh: fetching from Firestore...');
+            const userDoc = db.collection('tinyWins').doc(syncCode);
+            const doc = await userDoc.get({ source: 'server' }); // Force server fetch
+
+            if (doc.exists) {
+              const remoteData = doc.data();
+              console.log('📥 Manual refresh: applying remote data');
+
+              // Apply remote changes
+              if (remoteData.todayTasks) state.todayTasks = remoteData.todayTasks;
+              if (remoteData.templates) state.templates = remoteData.templates;
+              if (remoteData.history) state.history = remoteData.history;
+              if (remoteData.todayMode) state.todayMode = remoteData.todayMode;
+              if (remoteData.scheduleByDate) state.scheduleByDate = remoteData.scheduleByDate;
+
+              // Save to localStorage
+              localStorage.setItem(STORAGE_KEYS.TODAY_TASKS, JSON.stringify(state.todayTasks));
+              localStorage.setItem(STORAGE_KEYS.TEMPLATES, JSON.stringify(state.templates));
+              localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(state.history));
+              localStorage.setItem(STORAGE_KEYS.SCHEDULE, JSON.stringify(state.scheduleByDate));
+            }
+          } else {
+            // Not synced, just reload from localStorage
+            console.log('🔄 Manual refresh: reloading from localStorage...');
+            loadState();
+          }
+
+          // Refresh the UI
+          renderTodayTasks();
+          updateProgressBar();
+
+          console.log('✅ Manual refresh complete');
+        } catch (error) {
+          console.error('❌ Manual refresh failed:', error);
+        } finally {
+          // Remove spinning animation after a short delay
+          setTimeout(() => {
+            refreshBtn.classList.remove('spinning');
+          }, 300);
         }
       }
 

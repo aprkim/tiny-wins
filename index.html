@@ -1962,7 +1962,8 @@
 
     <script>
         // ==================== STORAGE KEYS ====================
-        const STORAGE_KEYS = {
+        // Make STORAGE_KEYS global so Firebase script can access it
+        window.STORAGE_KEYS = {
             SETUP_COMPLETE: 'tinyWins_setupComplete',
             LAST_TAB: 'tinyWins_lastActiveTab',
             TEMPLATES: 'tinyWins_templates',
@@ -1973,6 +1974,7 @@
             HISTORY: 'tinyWins_history',
             SCHEDULE: 'tinyWins_schedule'
         };
+        const STORAGE_KEYS = window.STORAGE_KEYS; // Keep local reference for convenience
 
         // ==================== SAMPLE TEMPLATES ====================
         const SAMPLE_TEMPLATES = {
@@ -2015,7 +2017,8 @@
         };
 
         // ==================== STATE ====================
-        let state = {
+        // Make state global so Firebase script can access it
+        window.state = {
             setupComplete: false,
             selectedTemplate: null,
             activeTab: 'today',
@@ -2032,6 +2035,7 @@
             scheduleByDate: {},  // { "YYYY-MM-DD": [{ id, start, end, text, done, order }] }
             activeScheduleDate: ''  // Currently selected date in schedule view
         };
+        const state = window.state; // Keep local reference for convenience
 
         // Local UI state for quick add important toggle
         let isImportant = false;
@@ -2871,14 +2875,26 @@
         // ==================== STORAGE ====================
         function saveTodayTasks() {
             localStorage.setItem(STORAGE_KEYS.TODAY_TASKS, JSON.stringify(state.todayTasks));
+            // Trigger Firebase sync if available
+            if (window.syncToFirebase) {
+                window.syncToFirebase();
+            }
         }
 
         function saveTemplates() {
             localStorage.setItem(STORAGE_KEYS.TEMPLATES, JSON.stringify(state.templates));
+            // Trigger Firebase sync if available
+            if (window.syncToFirebase) {
+                window.syncToFirebase();
+            }
         }
 
         function saveHistory() {
             localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(state.history));
+            // Trigger Firebase sync if available
+            if (window.syncToFirebase) {
+                window.syncToFirebase();
+            }
         }
 
         // ==================== CONFETTI ====================
@@ -3136,9 +3152,9 @@
         function saveSchedule() {
             localStorage.setItem(STORAGE_KEYS.SCHEDULE, JSON.stringify(state.scheduleByDate));
 
-            // Sync to Firestore if connected
-            if (syncCode && firebaseReady) {
-                saveToFirestore();
+            // Trigger Firebase sync if available
+            if (window.syncToFirebase) {
+                window.syncToFirebase();
             }
         }
 
@@ -3995,32 +4011,32 @@
         try {
           // Update state with imported data
           if (importedData.templates) {
-            state.templates = importedData.templates;
+            window.state.templates = importedData.templates;
             saveTemplates();
           }
 
           if (importedData.history) {
-            state.history = importedData.history.slice(0, 30); // Keep only last 30
+            window.state.history = importedData.history.slice(0, 30); // Keep only last 30
             saveHistory();
           }
 
           if (importedData.todayTasks) {
-            state.todayTasks = importedData.todayTasks;
+            window.state.todayTasks = importedData.todayTasks;
             saveTodayTasks();
           }
 
           if (importedData.todayMode) {
-            state.todayMode = importedData.todayMode;
-            localStorage.setItem(STORAGE_KEYS.TODAY_MODE, importedData.todayMode);
+            window.state.todayMode = importedData.todayMode;
+            localStorage.setItem(window.STORAGE_KEYS.TODAY_MODE, importedData.todayMode);
           }
 
           if (importedData.todayDate) {
-            state.todayDate = importedData.todayDate;
-            localStorage.setItem(STORAGE_KEYS.TODAY_DATE, importedData.todayDate);
+            window.state.todayDate = importedData.todayDate;
+            localStorage.setItem(window.STORAGE_KEYS.TODAY_DATE, importedData.todayDate);
           }
 
           if (importedData.scheduleByDate) {
-            state.scheduleByDate = importedData.scheduleByDate;
+            window.state.scheduleByDate = importedData.scheduleByDate;
             saveSchedule();
           }
 
@@ -4256,20 +4272,20 @@
             });
 
             // Apply remote changes
-            if (remoteData.todayTasks) state.todayTasks = remoteData.todayTasks;
-            if (remoteData.templates) state.templates = remoteData.templates;
-            if (remoteData.history) state.history = remoteData.history;
-            if (remoteData.todayMode) state.todayMode = remoteData.todayMode;
-            if (remoteData.scheduleByDate) state.scheduleByDate = remoteData.scheduleByDate;
+            if (remoteData.todayTasks) window.state.todayTasks = remoteData.todayTasks;
+            if (remoteData.templates) window.state.templates = remoteData.templates;
+            if (remoteData.history) window.state.history = remoteData.history;
+            if (remoteData.todayMode) window.state.todayMode = remoteData.todayMode;
+            if (remoteData.scheduleByDate) window.state.scheduleByDate = remoteData.scheduleByDate;
 
             // Save to localStorage to keep it in sync
-            localStorage.setItem(STORAGE_KEYS.TODAY_TASKS, JSON.stringify(state.todayTasks));
-            localStorage.setItem(STORAGE_KEYS.TEMPLATES, JSON.stringify(state.templates));
-            localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(state.history));
-            localStorage.setItem(STORAGE_KEYS.SCHEDULE, JSON.stringify(state.scheduleByDate));
+            localStorage.setItem(STORAGE_KEYS.TODAY_TASKS, JSON.stringify(window.state.todayTasks));
+            localStorage.setItem(STORAGE_KEYS.TEMPLATES, JSON.stringify(window.state.templates));
+            localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(window.state.history));
+            localStorage.setItem(STORAGE_KEYS.SCHEDULE, JSON.stringify(window.state.scheduleByDate));
 
             // Refresh the current view based on active tab
-            const activeTab = state.activeTab;
+            const activeTab = window.state.activeTab;
             if (activeTab === 'today') {
                 renderTodayTasks();
                 updateProgressBar();
@@ -4298,7 +4314,7 @@
                   expectingDataFromSync = false;
 
                   // Go back to onboarding
-                  localStorage.removeItem(STORAGE_KEYS.SETUP_COMPLETE);
+                  localStorage.removeItem(window.STORAGE_KEYS.SETUP_COMPLETE);
                   location.reload();
                 }
               );
@@ -4331,11 +4347,11 @@
 
         try {
           await db.collection('tinyWins').doc(syncCode).set({
-            todayTasks: state.todayTasks,
-            templates: state.templates,
-            history: state.history,
-            todayMode: state.todayMode,
-            scheduleByDate: state.scheduleByDate,
+            todayTasks: window.state.todayTasks,
+            templates: window.state.templates,
+            history: window.state.history,
+            todayMode: window.state.todayMode,
+            scheduleByDate: window.state.scheduleByDate,
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
           }, { merge: true });
           
@@ -4372,17 +4388,17 @@
               console.log('📥 Manual refresh: applying remote data');
 
               // Apply remote changes
-              if (remoteData.todayTasks) state.todayTasks = remoteData.todayTasks;
-              if (remoteData.templates) state.templates = remoteData.templates;
-              if (remoteData.history) state.history = remoteData.history;
-              if (remoteData.todayMode) state.todayMode = remoteData.todayMode;
-              if (remoteData.scheduleByDate) state.scheduleByDate = remoteData.scheduleByDate;
+              if (remoteData.todayTasks) window.state.todayTasks = remoteData.todayTasks;
+              if (remoteData.templates) window.state.templates = remoteData.templates;
+              if (remoteData.history) window.state.history = remoteData.history;
+              if (remoteData.todayMode) window.state.todayMode = remoteData.todayMode;
+              if (remoteData.scheduleByDate) window.state.scheduleByDate = remoteData.scheduleByDate;
 
               // Save to localStorage
-              localStorage.setItem(STORAGE_KEYS.TODAY_TASKS, JSON.stringify(state.todayTasks));
-              localStorage.setItem(STORAGE_KEYS.TEMPLATES, JSON.stringify(state.templates));
-              localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(state.history));
-              localStorage.setItem(STORAGE_KEYS.SCHEDULE, JSON.stringify(state.scheduleByDate));
+              localStorage.setItem(STORAGE_KEYS.TODAY_TASKS, JSON.stringify(window.state.todayTasks));
+              localStorage.setItem(STORAGE_KEYS.TEMPLATES, JSON.stringify(window.state.templates));
+              localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(window.state.history));
+              localStorage.setItem(STORAGE_KEYS.SCHEDULE, JSON.stringify(window.state.scheduleByDate));
             }
           } else {
             // Not synced, just reload from localStorage
@@ -4405,24 +4421,11 @@
         }
       }
 
-      // Hook into existing save functions
-      const originalSaveTodayTasks = saveTodayTasks;
-      const originalSaveTemplates = saveTemplates;
-      const originalSaveHistory = saveHistory;
-
-      saveTodayTasks = function() {
-        originalSaveTodayTasks();
-        saveToFirestore();
-      };
-
-      saveTemplates = function() {
-        originalSaveTemplates();
-        saveToFirestore();
-      };
-
-      saveHistory = function() {
-        originalSaveHistory();
-        saveToFirestore();
+      // Expose sync function globally so save functions can call it
+      window.syncToFirebase = function() {
+        if (firebaseReady && syncCode) {
+          saveToFirestore();
+        }
       };
 
       // Sync Code UI Functions
